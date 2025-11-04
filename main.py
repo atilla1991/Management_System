@@ -34,6 +34,7 @@ while True:
                 print("3. List Users")
                 print("4. Remove User")
                 print("10. Logout to Main Menu")
+
                 admin_choice = input("Please choose an option: ")
 
                 if admin_choice == "1":#Log list and reset

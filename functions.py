@@ -1,4 +1,4 @@
-import os
+import os #To handle file paths and directories
 from datetime import datetime #To write log dates and times
 
 #To print main menu and continue to next menu(Ayşenur)
@@ -66,7 +66,6 @@ def add_logout_entry(username):
         log.write(f"{timestamp} - {username} logged out.\n")
 
 #To list logs and reset them as admin(Kadir)
-def list_and_reset_logs():
     print("\n--- System Logs ---")
     try:
         with open("PMS/logs.txt", "r", encoding="utf8") as file:
@@ -77,9 +76,79 @@ def list_and_reset_logs():
                 print(log.strip())
     except FileNotFoundError:
         print("Log file not found.")
-    
-    reset_choice = input("Do you want to reset the logs? (y/n): ")
+    reset_choice = input("\nDo you want to reset the logs? (y/n): ")
     if reset_choice.lower() == 'y':
         with open("PMS/logs.txt", "w", encoding="utf8") as file:
             file.write("")
+            file.write(f"Logs have been reseted by {username}.\n")
         print("System logs have been reset.")
+
+#To add or remove products as user(Atilla)
+def add_or_remove_product():
+    product_name = input("Enter product name: ").lower()
+
+    try:
+        change = int(input("Enter a positive number to add stock, a negative number to remove: "))
+    except ValueError:
+        print("Invalid number entered.")
+        return
+
+    products = {}
+    try:
+        with open("PMS/products.txt", "r", encoding="utf8") as file:
+            for line in file:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    name, quantity = line.split("-", 1)
+                    products[name.strip()] = int(quantity.strip())
+                except ValueError:
+                    continue
+    except FileNotFoundError:
+        open("PMS/products.txt", "w", encoding="utf8").close()
+
+    current_stock = products.get(product_name, 0)
+    new_stock = current_stock + change
+    
+    if product_name not in products and change <= 0:
+        print("Product does not exist, cannot remove stock.")
+        return
+    if new_stock < 0:
+        print(f"Not enough stock to remove. Current stock: {current_stock}")
+        return
+        
+    products[product_name] = new_stock
+    
+    with open("PMS/products.txt", "w", encoding="utf8") as file:
+        for name, quantity in products.items():
+            if quantity > 0:
+                file.write(f"{name}-{quantity}\n")
+
+    if change > 0:
+        print(f"{change} units added to '{product_name}'. New stock: {new_stock}")
+    elif change < 0:
+        print(f"{abs(change)} units removed from '{product_name}'. New stock: {new_stock}")
+    else:
+        print("No change in stock was made.")
+
+    if new_stock == 0:
+        print(f"Stock for '{product_name}' is now zero and it has been removed from the list.")
+
+#To list products as user(Atilla)
+def list_products():
+    clear_terminal()
+    print("\n--- Product List ---")
+    try:
+        with open("PMS/Products.txt", "r", encoding="utf8") as file:
+            products = file.readlines()
+            if not products:
+                print("No products found.")
+            for product in products:
+                print(product.strip())
+    except FileNotFoundError:
+        print("No products have been added yet.")
+
+#To clear terminal screen(Atilla)
+def clear_terminal():
+    os.system('cls' if os.name == 'nt' else 'clear')
